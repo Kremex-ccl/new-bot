@@ -63,12 +63,94 @@
         .role-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
         .summary-item { background: white; border-radius: 10px; padding: 15px; border-left: 4px solid; }
         
+        /* Стили для модального окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3436;
+            text-align: center;
+        }
+        
+        .email-input-group {
+            margin-bottom: 25px;
+        }
+        
+        .email-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+        
+        .organizer-info {
+            background: #e8f6f3;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
         @media (max-width: 480px) {
             .container { padding: 15px; }
             h1 { font-size: 24px; }
             .points-slider { flex-direction: column; gap: 15px; }
             .points-value { width: 45px; height: 45px; font-size: 18px; }
             .role-summary { grid-template-columns: 1fr; }
+            .modal { padding: 20px; }
         }
     </style>
 </head>
@@ -92,6 +174,14 @@
                     <input type="text" id="lastName" class="form-input" placeholder="Введите вашу фамилию" required maxlength="50">
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Email организатора</label>
+                    <input type="email" id="organizerEmail" class="form-input" placeholder="organizer@mail.ru" required>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">
+                        Введите email организатора, который получит ваши результаты
+                    </div>
+                </div>
+
                 <div style="background: #e8f6f3; border-radius: 12px; padding: 20px; margin: 25px 0;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                         <span style="font-size: 20px;">🔒</span>
@@ -99,7 +189,7 @@
                     </div>
                     <p style="color: #495057; font-size: 14px; line-height: 1.5;">
                         Нажимая "Начать тест", вы соглашаетесь на обработку ваших персональных данных 
-                        (ФИО и результатов теста) для формирования персонализированного отчета.
+                        (ФИО, email организатора и результатов теста) для формирования персонализированного отчета.
                     </p>
                 </div>
 
@@ -179,8 +269,12 @@
             </div>
 
             <!-- Кнопки действий -->
-            <button onclick="saveAndExport()" class="btn btn-primary" id="saveResultsBtn">
-                💾 Сохранить и экспортировать
+            <button onclick="sendResultsToOrganizer()" class="btn btn-primary" id="sendResultsBtn">
+                📧 Отправить результаты организатору
+            </button>
+            
+            <button onclick="downloadResults()" class="btn btn-secondary" style="margin-top: 10px;">
+                💾 Скачать мой отчет
             </button>
             
             <button onclick="showTestAgain()" class="btn btn-secondary" style="margin-top: 10px;">
@@ -189,18 +283,72 @@
         </div>
     </div>
 
+    <!-- Модальное окно подтверждения отправки -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal">
+            <div class="modal-title">📤 Отправка результатов</div>
+            
+            <div id="emailSendingStatus">
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+                    <p>Подготовка и отправка результатов...</p>
+                </div>
+            </div>
+            
+            <div id="emailSuccess" style="display: none;">
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 48px; color: #00b894; margin-bottom: 20px;">✅</div>
+                    <h3 style="color: #00b894; margin-bottom: 15px;">Результаты отправлены!</h3>
+                    <p style="color: #495057; margin-bottom: 20px;">
+                        Ваши результаты успешно отправлены организатору на email:
+                        <strong id="sentToEmail"></strong>
+                    </p>
+                    <p style="color: #6c757d; font-size: 14px; margin-bottom: 20px;">
+                        Откроется окно вашего почтового клиента. Если окно не открылось автоматически,
+                        проверьте папку "Черновики" или настройки браузера.
+                    </p>
+                </div>
+                
+                <button onclick="closeEmailModal()" class="btn btn-primary" style="margin-top: 20px;">
+                    Понятно
+                </button>
+            </div>
+            
+            <div id="emailError" style="display: none;">
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 48px; color: #e17055; margin-bottom: 20px;">❌</div>
+                    <h3 style="color: #e17055; margin-bottom: 15px;">Ошибка отправки</h3>
+                    <p style="color: #495057; margin-bottom: 20px;" id="errorMessage">
+                        Не удалось отправить результаты. Пожалуйста, попробуйте еще раз.
+                    </p>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="closeEmailModal()" class="btn btn-secondary" style="flex: 1;">
+                        Закрыть
+                    </button>
+                    <button onclick="retryEmailSending()" class="btn btn-primary" style="flex: 1;">
+                        Попробовать снова
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // === КОНФИГУРАЦИЯ ===
-        // Замените этот URL на свой Google Apps Script URL
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        // Email организатора по умолчанию
+        const DEFAULT_ORGANIZER_EMAIL = 'organizer@mail.ru'; // Замените на реальный email
         
         // Данные пользователя
         let userData = {
             firstName: '',
             lastName: '',
+            organizerEmail: '',
             telegramId: null,
             testDate: null,
-            resultId: null
+            resultId: null,
+            telegramUsername: null
         };
 
         // Состояние теста
@@ -214,6 +362,9 @@
             }
         };
 
+        // Результаты теста
+        let testResults = null;
+
         // === ИНИЦИАЛИЗАЦИЯ ===
         document.addEventListener('DOMContentLoaded', function() {
             const tg = window.Telegram?.WebApp;
@@ -222,6 +373,7 @@
                 tg.expand();
                 if (tg.initDataUnsafe?.user) {
                     userData.telegramId = tg.initDataUnsafe.user.id;
+                    userData.telegramUsername = tg.initDataUnsafe.user.username;
                     if (tg.initDataUnsafe.user.first_name) {
                         document.getElementById('firstName').value = tg.initDataUnsafe.user.first_name;
                     }
@@ -230,6 +382,9 @@
                     }
                 }
             }
+            
+            // Устанавливаем email организатора по умолчанию
+            document.getElementById('organizerEmail').value = DEFAULT_ORGANIZER_EMAIL;
             
             document.getElementById('registrationForm').addEventListener('submit', handleRegistration);
             showScreen('screen-registration');
@@ -241,20 +396,37 @@
             
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
+            const organizerEmail = document.getElementById('organizerEmail').value.trim();
             
+            // Валидация
             if (!firstName || !lastName) {
                 showNotification('Пожалуйста, заполните имя и фамилию');
                 return;
             }
             
+            if (!organizerEmail || !isValidEmail(organizerEmail)) {
+                showNotification('Пожалуйста, введите корректный email организатора');
+                return;
+            }
+            
             userData.firstName = firstName;
             userData.lastName = lastName;
+            userData.organizerEmail = organizerEmail;
             userData.testDate = new Date().toISOString();
-            userData.resultId = 'RES-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            userData.resultId = generateResultId();
             
             document.getElementById('currentUserName').textContent = `${firstName} ${lastName}`;
             
             startTest();
+        }
+
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function generateResultId() {
+            return 'BELBIN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
         }
 
         // === ТЕСТ БЕЛБИНА ===
@@ -660,6 +832,16 @@
                 }))
                 .sort((a, b) => b.score - a.score);
             
+            // Сохраняем результаты
+            testResults = {
+                user: userData,
+                testResults: testState.totalScores,
+                topRoles: sortedRoles.slice(0, 3),
+                worstRole: sortedRoles[sortedRoles.length - 1],
+                sortedRoles: sortedRoles,
+                timestamp: new Date().toISOString()
+            };
+            
             // Топ-3 роли
             const strongResultsContainer = document.getElementById('strong-results');
             const medals = ['🥇', '🥈', '🥉'];
@@ -715,118 +897,259 @@
             }).join('');
         }
 
-        // === СОХРАНЕНИЕ И ЭКСПОРТ ДАННЫХ ===
-        async function saveAndExport() {
-            const saveBtn = document.getElementById('saveResultsBtn');
-            saveBtn.textContent = '⏳ Сохраняем...';
-            saveBtn.disabled = true;
+        // === ОТПРАВКА РЕЗУЛЬТАТОВ НА EMAIL ===
+        function sendResultsToOrganizer() {
+            if (!testResults) {
+                showNotification('Сначала завершите тест');
+                return;
+            }
             
+            openEmailModal();
+            
+            // Задержка для анимации
+            setTimeout(() => {
+                const success = sendEmailReport(testResults);
+                
+                if (success) {
+                    showEmailSuccess();
+                } else {
+                    showEmailError('Не удалось открыть почтовый клиент. Пожалуйста, отправьте результаты вручную.');
+                }
+            }, 1500);
+        }
+
+        function sendEmailReport(data) {
             try {
-                // 1. Собираем данные
-                const sortedRoles = Object.entries(testState.totalScores)
-                    .map(([name, score]) => ({ name, score }))
-                    .sort((a, b) => b.score - a.score);
+                const email = userData.organizerEmail || DEFAULT_ORGANIZER_EMAIL;
+                const subject = `Результат теста Белбина: ${data.user.firstName} ${data.user.lastName} (ID: ${data.user.resultId})`;
                 
-                const worstRole = sortedRoles[sortedRoles.length - 1];
+                const body = `
+РЕЗУЛЬТАТ ТЕСТА БЕЛБИНА
+=======================
+
+📋 ОБЩАЯ ИНФОРМАЦИЯ:
+-------------------
+👤 Испытуемый: ${data.user.firstName} ${data.user.lastName}
+🆔 ID результата: ${data.user.resultId}
+📅 Дата тестирования: ${new Date(data.timestamp).toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+🌐 Источник: Telegram мини-приложение
+${data.user.telegramId ? `🆔 Telegram ID: ${data.user.telegramId}` : ''}
+${data.user.telegramUsername ? `👤 Telegram username: @${data.user.telegramUsername}` : ''}
+
+🏆 СИЛЬНЫЕ РОЛИ (ТОП-3):
+------------------------
+🥇 ${data.topRoles[0]?.name}: ${data.topRoles[0]?.score} баллов
+🥈 ${data.topRoles[1]?.name}: ${data.topRoles[1]?.score} баллов  
+🥉 ${data.topRoles[2]?.name}: ${data.topRoles[2]?.score} баллов
+
+💪 РОЛЬ ДЛЯ РАЗВИТИЯ:
+---------------------
+🎯 ${data.worstRole.name}: ${data.worstRole.score} баллов
+📝 Тип: ${belbinRoles[data.worstRole.name]?.type || 'Не указан'}
+
+📊 ПОЛНАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ:
+-------------------------------
+${data.sortedRoles.map((role, index) => 
+    `${index + 1}. ${role.name}: ${role.score} баллов`
+).join('\n')}
+
+🎯 РЕКОМЕНДАЦИИ ПО РАЗВИТИЮ "${data.worstRole.name}":
+---------------------------------------------------
+${belbinRoles[data.worstRole.name]?.improveTips?.map((tip, i) => 
+    `${i + 1}. ${tip}`
+).join('\n')}
+
+📋 ОПИСАНИЕ РОЛИ "${data.worstRole.name}":
+----------------------------------------
+${belbinRoles[data.worstRole.name]?.description || 'Описание не найдено'}
+
+📈 СИЛЬНЫЕ СТОРОНЫ: ${belbinRoles[data.worstRole.name]?.strengths?.join(', ') || 'Не указаны'}
+📉 СЛАБЫЕ СТОРОНЫ: ${belbinRoles[data.worstRole.name]?.weaknesses?.join(', ') || 'Не указаны'}
+
+=======================
+📧 Это автоматическое письмо, сгенерированное мини-приложением "Тест Белбина"
+🔗 Результат сохранен с ID: ${data.user.resultId}
+                `;
                 
-                const dataToSave = {
-                    user: userData,
-                    testResults: testState.totalScores,
-                    topRoles: sortedRoles.slice(0, 3),
-                    worstRole: worstRole,
-                    timestamp: new Date().toISOString()
-                };
+                // Создаем ссылку mailto
+                const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
-                // 2. Сохраняем в Google Sheets (если настроен URL)
-                if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.includes('google.com')) {
-                    await saveToGoogleSheets(dataToSave);
-                }
+                // Пытаемся открыть почтовый клиент
+                const mailWindow = window.open(mailtoLink, '_blank');
                 
-                // 3. Сохраняем локально
-                localStorage.setItem(`belbin_result_${userData.resultId}`, JSON.stringify(dataToSave));
+                // Если окно заблокировано (поп-ап блокер), показываем альтернативу
+                setTimeout(() => {
+                    if (!mailWindow || mailWindow.closed || typeof mailWindow.closed == 'undefined') {
+                        // Поп-ап заблокирован, предлагаем альтернативу
+                        showEmailAlternative(email, subject, body);
+                    }
+                }, 1000);
                 
-                // 4. Экспортируем для пользователя
-                exportPersonalReport(dataToSave);
-                
-                // 5. Отправляем в Telegram (если есть)
-                if (window.Telegram?.WebApp) {
-                    Telegram.WebApp.sendData(JSON.stringify({
-                        type: 'belbin_results',
-                        data: dataToSave
-                    }));
-                }
-                
-                showNotification('✅ Результаты сохранены и экспортированы!');
+                return true;
                 
             } catch (error) {
-                console.error('Ошибка сохранения:', error);
-                showNotification('⚠️ Результаты сохранены локально');
+                console.error('Ошибка отправки email:', error);
+                return false;
             }
+        }
+
+        function showEmailAlternative(email, subject, body) {
+            document.getElementById('emailSendingStatus').style.display = 'none';
+            document.getElementById('emailError').style.display = 'block';
+            
+            const errorMessage = `
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 48px; color: #f39c12; margin-bottom: 20px;">⚠️</div>
+                    <h3 style="color: #f39c12; margin-bottom: 15px;">Поп-ап заблокирован</h3>
+                    <p style="color: #495057; margin-bottom: 15px;">
+                        Браузер заблокировал открытие почтового клиента.
+                    </p>
+                    <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left;">
+                        <p><strong>Скопируйте данные ниже:</strong></p>
+                        <p><strong>Кому:</strong> ${email}</p>
+                        <p><strong>Тема:</strong> ${subject}</p>
+                        <textarea 
+                            id="emailBodyText" 
+                            style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 12px; margin-top: 10px;"
+                            readonly
+                        >${body}</textarea>
+                        <button onclick="copyEmailBody()" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">
+                            📋 Скопировать текст письма
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('errorMessage').innerHTML = errorMessage;
+        }
+
+        function copyEmailBody() {
+            const textarea = document.getElementById('emailBodyText');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // Для мобильных устройств
+            
+            try {
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    showNotification('Текст письма скопирован в буфер обмена');
+                });
+            } catch (err) {
+                // Fallback для старых браузеров
+                document.execCommand('copy');
+                showNotification('Текст письма скопирован в буфер обмена');
+            }
+        }
+
+        // === УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ ===
+        function openEmailModal() {
+            document.getElementById('emailModal').classList.add('active');
+            document.getElementById('emailSendingStatus').style.display = 'block';
+            document.getElementById('emailSuccess').style.display = 'none';
+            document.getElementById('emailError').style.display = 'none';
+        }
+
+        function closeEmailModal() {
+            document.getElementById('emailModal').classList.remove('active');
+        }
+
+        function showEmailSuccess() {
+            document.getElementById('emailSendingStatus').style.display = 'none';
+            document.getElementById('emailSuccess').style.display = 'block';
+            document.getElementById('sentToEmail').textContent = userData.organizerEmail;
+        }
+
+        function showEmailError(message) {
+            document.getElementById('emailSendingStatus').style.display = 'none';
+            document.getElementById('emailError').style.display = 'block';
+            if (message) {
+                document.getElementById('errorMessage').textContent = message;
+            }
+        }
+
+        function retryEmailSending() {
+            document.getElementById('emailError').style.display = 'none';
+            document.getElementById('emailSendingStatus').style.display = 'block';
             
             setTimeout(() => {
-                saveBtn.textContent = '💾 Сохранить и экспортировать';
-                saveBtn.disabled = false;
-            }, 2000);
+                const success = sendEmailReport(testResults);
+                if (success) {
+                    showEmailSuccess();
+                } else {
+                    showEmailError('Пожалуйста, отправьте результаты вручную через ваш почтовый клиент.');
+                }
+            }, 1000);
         }
 
-        async function saveToGoogleSheets(data) {
-            if (!GOOGLE_SCRIPT_URL) return;
-            
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                console.log('Данные отправлены в Google Sheets');
-            } catch (error) {
-                console.log('Не удалось отправить в Google Sheets:', error);
+        // === СКАЧИВАНИЕ ОТЧЕТА ===
+        function downloadResults() {
+            if (!testResults) {
+                showNotification('Нет результатов для скачивания');
+                return;
             }
+            
+            const report = generateReportText();
+            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            a.href = url;
+            a.download = `belbin_${testResults.user.firstName}_${testResults.user.lastName}_${testResults.user.resultId}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Отчет скачан');
         }
 
-        function exportPersonalReport(data) {
-            const report = `
+        function generateReportText() {
+            const data = testResults;
+            return `
 ТЕСТ БЕЛБИНА - ПЕРСОНАЛЬНЫЙ ОТЧЕТ
 ===================================
 
 👤 ИСПЫТУЕМЫЙ: ${data.user.firstName} ${data.user.lastName}
-📅 ДАТА ТЕСТА: ${new Date(data.timestamp).toLocaleDateString('ru-RU')}
 🆔 ID РЕЗУЛЬТАТА: ${data.user.resultId}
+📅 ДАТА ТЕСТА: ${new Date(data.timestamp).toLocaleDateString('ru-RU')}
 
 🏆 ВАШИ СИЛЬНЫЕ РОЛИ:
-${data.topRoles.map((r, i) => `${i+1}. ${r.name}: ${r.score} баллов`).join('\n')}
+${data.topRoles.map((r, i) => `${['🥇', '🥈', '🥉'][i]} ${r.name}: ${r.score} баллов`).join('\n')}
 
-💪 РОЛЬ ДЛЯ РАЗВИТИЯ: ${data.worstRole.name} (${data.worstRole.score} баллов)
+💪 РОЛЬ ДЛЯ МАКСИМАЛЬНОГО РАЗВИТИЯ:
+${data.worstRole.name} (${data.worstRole.score} баллов)
 
-📊 ВСЕ РЕЗУЛЬТАТЫ:
-${Object.entries(data.testResults)
-  .sort((a, b) => b[1] - a[1])
-  .map(([role, score]) => `${role}: ${score} баллов`)
-  .join('\n')}
+📝 ОПИСАНИЕ РОЛИ:
+${belbinRoles[data.worstRole.name]?.description || ''}
 
-🎯 РЕКОМЕНДАЦИИ ПО РАЗВИТИЮ ${data.worstRole.name}:
+📈 СИЛЬНЫЕ СТОРОНЫ: ${belbinRoles[data.worstRole.name]?.strengths?.join(', ') || ''}
+📉 СЛАБЫЕ СТОРОНЫ: ${belbinRoles[data.worstRole.name]?.weaknesses?.join(', ') || ''}
+
+🎯 КОНКРЕТНЫЕ ШАГИ ДЛЯ УЛУЧШЕНИЯ:
 ${belbinRoles[data.worstRole.name]?.improveTips?.map((tip, i) => `${i+1}. ${tip}`).join('\n')}
 
+📊 ПОЛНАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ:
+${data.sortedRoles.map((role, index) => 
+    `${index + 1}. ${role.name}: ${role.score} баллов`
+).join('\n')}
+
 ===================================
-Тест проведен через мини-приложение Белбина
-`;
-            
-            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `belbin_${data.user.firstName}_${data.user.lastName}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+📧 Отправлено организатору: ${userData.organizerEmail}
+🔗 Сгенерировано мини-приложением Тест Белбина
+            `;
         }
 
+        // === ПРОЧИЕ ФУНКЦИИ ===
         function showTestAgain() {
             if (confirm('Пройти тест заново? Текущие результаты будут сброшены.')) {
                 showScreen('screen-registration');
                 document.getElementById('registrationForm').reset();
+                document.getElementById('organizerEmail').value = DEFAULT_ORGANIZER_EMAIL;
+                testResults = null;
             }
         }
 
