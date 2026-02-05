@@ -144,6 +144,24 @@
             line-height: 1.5;
         }
         
+        .email-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
         @media (max-width: 480px) {
             .container { padding: 15px; }
             h1 { font-size: 24px; }
@@ -176,7 +194,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Email организатора</label>
-                    <input type="email" id="organizerEmail" class="form-input" placeholder="89922111363@mail.ru" required>
+                    <input type="email" id="organizerEmail" class="form-input" placeholder="89922111363@mail.ru" required value="89922111363@mail.ru">
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">
                         Введите email организатора, который получит ваши результаты
                     </div>
@@ -283,43 +301,42 @@
         </div>
     </div>
 
-    <!-- Модальное окно подтверждения отправки -->
+    <!-- Модальное окно отправки результатов -->
     <div class="modal-overlay" id="emailModal">
         <div class="modal">
             <div class="modal-title">📤 Отправка результатов</div>
             
-            <div id="emailSendingStatus">
+            <div id="emailSendingStatus" style="display: none;">
                 <div style="text-align: center; margin: 20px 0;">
                     <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
-                    <p>Подготовка и отправка результатов...</p>
+                    <p>Подготовка результатов...</p>
                 </div>
+            </div>
+            
+            <div id="emailActionInterface">
+                <!-- Здесь будет динамически создаваемый интерфейс -->
             </div>
             
             <div id="emailSuccess" style="display: none;">
                 <div style="text-align: center; margin: 20px 0;">
                     <div style="font-size: 48px; color: #00b894; margin-bottom: 20px;">✅</div>
-                    <h3 style="color: #00b894; margin-bottom: 15px;">Результаты отправлены!</h3>
+                    <h3 style="color: #00b894; margin-bottom: 15px;">Готово!</h3>
                     <p style="color: #495057; margin-bottom: 20px;">
-                        Ваши результаты успешно отправлены организатору на email:
-                        <strong id="sentToEmail"></strong>
-                    </p>
-                    <p style="color: #6c757d; font-size: 14px; margin-bottom: 20px;">
-                        Откроется окно вашего почтового клиента. Если окно не открылось автоматически,
-                        проверьте папку "Черновики" или настройки браузера.
+                        Результаты подготовлены для отправки. Проверьте свой почтовый клиент.
                     </p>
                 </div>
                 
                 <button onclick="closeEmailModal()" class="btn btn-primary" style="margin-top: 20px;">
-                    Понятно
+                    Закрыть
                 </button>
             </div>
             
             <div id="emailError" style="display: none;">
                 <div style="text-align: center; margin: 20px 0;">
                     <div style="font-size: 48px; color: #e17055; margin-bottom: 20px;">❌</div>
-                    <h3 style="color: #e17055; margin-bottom: 15px;">Ошибка отправки</h3>
+                    <h3 style="color: #e17055; margin-bottom: 15px;">Ошибка</h3>
                     <p style="color: #495057; margin-bottom: 20px;" id="errorMessage">
-                        Не удалось отправить результаты. Пожалуйста, попробуйте еще раз.
+                        Произошла ошибка при подготовке результатов.
                     </p>
                 </div>
                 
@@ -337,8 +354,8 @@
 
     <script>
         // === КОНФИГУРАЦИЯ ===
-        // Email организатора по умолчанию
-        const DEFAULT_ORGANIZER_EMAIL = '89922111363@mail.ru'; // Замените на реальный email
+        // Email организатора по умолчанию - ЗАМЕНИТЕ НА СВОЙ EMAIL
+        const DEFAULT_ORGANIZER_EMAIL = '89922111363@mail.ru';
         
         // Данные пользователя
         let userData = {
@@ -897,7 +914,7 @@
             }).join('');
         }
 
-        // === ОТПРАВКА РЕЗУЛЬТАТОВ НА EMAIL ===
+        // === ОТПРАВКА РЕЗУЛЬТАТОВ НА EMAIL (РЕШЕНИЕ 2) ===
         function sendResultsToOrganizer() {
             if (!testResults) {
                 showNotification('Сначала завершите тест');
@@ -905,39 +922,193 @@
             }
             
             openEmailModal();
-            
-            // Задержка для анимации
-            setTimeout(() => {
-                const success = sendEmailReport(testResults);
-                
-                if (success) {
-                    showEmailSuccess();
-                } else {
-                    showEmailError('Не удалось открыть почтовый клиент. Пожалуйста, отправьте результаты вручную.');
-                }
-            }, 1500);
+            showEmailSendingInterface();
         }
 
-        function sendEmailReport(data) {
-            try {
-                const email = userData.organizerEmail || DEFAULT_ORGANIZER_EMAIL;
-                const subject = `Результат теста Белбина: ${data.user.firstName} ${data.user.lastName} (ID: ${data.user.resultId})`;
-                
-                const body = `
-РЕЗУЛЬТАТ ТЕСТА БЕЛБИНА
+        function showEmailSendingInterface() {
+            const email = userData.organizerEmail || DEFAULT_ORGANIZER_EMAIL;
+            const subject = `Результат теста Белбина: ${testResults.user.firstName} ${testResults.user.lastName} (ID: ${testResults.user.resultId})`;
+            const body = generateEmailBody(testResults);
+            
+            // Создаем mailto ссылку
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Сохраняем для использования в копировании
+            window.currentEmailData = { email, subject, body, mailtoLink };
+            
+            // Показываем интерфейс с кнопками
+            document.getElementById('emailSendingStatus').style.display = 'none';
+            document.getElementById('emailSuccess').style.display = 'none';
+            document.getElementById('emailError').style.display = 'none';
+            document.getElementById('emailActionInterface').style.display = 'block';
+            
+            const actionHTML = `
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 48px; color: #6c5ce7; margin-bottom: 20px;">📤</div>
+                    <h3 style="color: #6c5ce7; margin-bottom: 15px;">Отправка результатов</h3>
+                    
+                    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px; padding: 20px; margin: 20px 0; border: 2px solid #dee2e6;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <div style="font-size: 24px;">👤</div>
+                            <div style="flex-grow: 1;">
+                                <div style="font-weight: 600; color: #2d3436;">${testResults.user.firstName} ${testResults.user.lastName}</div>
+                                <div style="color: #6c757d; font-size: 14px;">ID: ${testResults.user.resultId}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-size: 24px;">📧</div>
+                            <div style="flex-grow: 1;">
+                                <div style="font-weight: 600; color: #2d3436;">Email получателя</div>
+                                <div style="color: #6c5ce7; font-size: 16px; word-break: break-all;">${email}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 25px 0;">
+                        <a href="${mailtoLink}" 
+                           class="btn btn-primary" 
+                           style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px;"
+                           onclick="trackEmailClick(event)">
+                            <span style="font-size: 20px;">📨</span>
+                            <span>Открыть в почтовом клиенте</span>
+                        </a>
+                        
+                        <button onclick="showEmailPreview()" 
+                                class="btn btn-secondary"
+                                style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 20px;">👁️</span>
+                            <span>Предварительный просмотр письма</span>
+                        </button>
+                        
+                        <button onclick="copyFullEmail()" 
+                                class="btn btn-secondary"
+                                style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 20px;">📋</span>
+                            <span>Скопировать текст письма</span>
+                        </button>
+                    </div>
+                    
+                    <div style="color: #6c757d; font-size: 14px; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                            <span style="color: #00b894; font-size: 18px;">💡</span>
+                            <div>
+                                <strong>Как отправить результаты:</strong><br>
+                                1. Нажмите "Открыть в почтовом клиенте"<br>
+                                2. Проверьте текст письма<br>
+                                3. Нажмите "Отправить" в вашем почтовом клиенте
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="color: #f39c12; font-size: 18px;">⚠️</span>
+                            <div>
+                                <strong>Если кнопка не работает:</strong><br>
+                                Скопируйте текст письма и отправьте его вручную через ваш почтовый сервис (Gmail, Яндекс.Почта, Mail.ru и т.д.)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('emailActionInterface').innerHTML = actionHTML;
+        }
+
+        function trackEmailClick(event) {
+            // Показываем успех через 1 секунду
+            setTimeout(() => {
+                showEmailSuccess();
+            }, 1000);
+        }
+
+        function showEmailPreview() {
+            const data = window.currentEmailData;
+            if (!data) return;
+            
+            const previewHTML = `
+                <div style="text-align: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <button onclick="showEmailSendingInterface()" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">
+                            ← Назад
+                        </button>
+                        <h3 style="margin: 0; color: #6c5ce7;">Предпросмотр письма</h3>
+                        <div style="width: 60px;"></div>
+                    </div>
+                    
+                    <div style="text-align: left; max-height: 400px; overflow-y: auto; background: white; border-radius: 10px; padding: 20px; border: 1px solid #dee2e6; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #dee2e6;">
+                            <div><strong>Кому:</strong> ${data.email}</div>
+                            <div><strong>Тема:</strong> ${data.subject}</div>
+                        </div>
+                        <div style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.4;">
+${data.body}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <a href="${data.mailtoLink}" 
+                           class="btn btn-primary" 
+                           style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 20px;">📨</span>
+                            <span>Отправить это письмо</span>
+                        </a>
+                        
+                        <button onclick="copyFullEmail()" 
+                                class="btn btn-secondary"
+                                style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 20px;">📋</span>
+                            <span>Скопировать текст</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('emailActionInterface').innerHTML = previewHTML;
+        }
+
+        function copyFullEmail() {
+            const data = window.currentEmailData;
+            if (!data) {
+                showNotificationInModal('Данные письма не найдены');
+                return;
+            }
+            
+            const fullEmail = `Кому: ${data.email}\nТема: ${data.subject}\n\n${data.body}`;
+            
+            navigator.clipboard.writeText(fullEmail).then(() => {
+                showNotificationInModal('✅ Текст письма скопирован в буфер обмена');
+            }).catch(err => {
+                // Fallback для старых браузеров
+                const textarea = document.createElement('textarea');
+                textarea.value = fullEmail;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotificationInModal('✅ Текст письма скопирован в буфер обмена');
+            });
+        }
+
+        function generateEmailBody(data) {
+            // Форматируем тело письма для лучшей читаемости
+            const formattedDate = new Date(data.timestamp).toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            return `РЕЗУЛЬТАТ ТЕСТА БЕЛБИНА
 =======================
 
 📋 ОБЩАЯ ИНФОРМАЦИЯ:
 -------------------
 👤 Испытуемый: ${data.user.firstName} ${data.user.lastName}
 🆔 ID результата: ${data.user.resultId}
-📅 Дата тестирования: ${new Date(data.timestamp).toLocaleDateString('ru-RU', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })}
+📅 Дата тестирования: ${formattedDate}
 🌐 Источник: Telegram мини-приложение
 ${data.user.telegramId ? `🆔 Telegram ID: ${data.user.telegramId}` : ''}
 ${data.user.telegramUsername ? `👤 Telegram username: @${data.user.telegramUsername}` : ''}
@@ -952,6 +1123,7 @@ ${data.user.telegramUsername ? `👤 Telegram username: @${data.user.telegramUse
 ---------------------
 🎯 ${data.worstRole.name}: ${data.worstRole.score} баллов
 📝 Тип: ${belbinRoles[data.worstRole.name]?.type || 'Не указан'}
+📋 Описание: ${belbinRoles[data.worstRole.name]?.description || ''}
 
 📊 ПОЛНАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ:
 -------------------------------
@@ -965,84 +1137,9 @@ ${belbinRoles[data.worstRole.name]?.improveTips?.map((tip, i) =>
     `${i + 1}. ${tip}`
 ).join('\n')}
 
-📋 ОПИСАНИЕ РОЛИ "${data.worstRole.name}":
-----------------------------------------
-${belbinRoles[data.worstRole.name]?.description || 'Описание не найдено'}
-
-📈 СИЛЬНЫЕ СТОРОНЫ: ${belbinRoles[data.worstRole.name]?.strengths?.join(', ') || 'Не указаны'}
-📉 СЛАБЫЕ СТОРОНЫ: ${belbinRoles[data.worstRole.name]?.weaknesses?.join(', ') || 'Не указаны'}
-
 =======================
 📧 Это автоматическое письмо, сгенерированное мини-приложением "Тест Белбина"
-🔗 Результат сохранен с ID: ${data.user.resultId}
-                `;
-                
-                // Создаем ссылку mailto
-                const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                
-                // Пытаемся открыть почтовый клиент
-                const mailWindow = window.open(mailtoLink, '_blank');
-                
-                // Если окно заблокировано (поп-ап блокер), показываем альтернативу
-                setTimeout(() => {
-                    if (!mailWindow || mailWindow.closed || typeof mailWindow.closed == 'undefined') {
-                        // Поп-ап заблокирован, предлагаем альтернативу
-                        showEmailAlternative(email, subject, body);
-                    }
-                }, 1000);
-                
-                return true;
-                
-            } catch (error) {
-                console.error('Ошибка отправки email:', error);
-                return false;
-            }
-        }
-
-        function showEmailAlternative(email, subject, body) {
-            document.getElementById('emailSendingStatus').style.display = 'none';
-            document.getElementById('emailError').style.display = 'block';
-            
-            const errorMessage = `
-                <div style="text-align: center; margin: 20px 0;">
-                    <div style="font-size: 48px; color: #f39c12; margin-bottom: 20px;">⚠️</div>
-                    <h3 style="color: #f39c12; margin-bottom: 15px;">Поп-ап заблокирован</h3>
-                    <p style="color: #495057; margin-bottom: 15px;">
-                        Браузер заблокировал открытие почтового клиента.
-                    </p>
-                    <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left;">
-                        <p><strong>Скопируйте данные ниже:</strong></p>
-                        <p><strong>Кому:</strong> ${email}</p>
-                        <p><strong>Тема:</strong> ${subject}</p>
-                        <textarea 
-                            id="emailBodyText" 
-                            style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 12px; margin-top: 10px;"
-                            readonly
-                        >${body}</textarea>
-                        <button onclick="copyEmailBody()" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">
-                            📋 Скопировать текст письма
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('errorMessage').innerHTML = errorMessage;
-        }
-
-        function copyEmailBody() {
-            const textarea = document.getElementById('emailBodyText');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999); // Для мобильных устройств
-            
-            try {
-                navigator.clipboard.writeText(textarea.value).then(() => {
-                    showNotification('Текст письма скопирован в буфер обмена');
-                });
-            } catch (err) {
-                // Fallback для старых браузеров
-                document.execCommand('copy');
-                showNotification('Текст письма скопирован в буфер обмена');
-            }
+🔗 Результат сохранен с ID: ${data.user.resultId}`;
         }
 
         // === УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ ===
@@ -1051,6 +1148,7 @@ ${belbinRoles[data.worstRole.name]?.description || 'Описание не най
             document.getElementById('emailSendingStatus').style.display = 'block';
             document.getElementById('emailSuccess').style.display = 'none';
             document.getElementById('emailError').style.display = 'none';
+            document.getElementById('emailActionInterface').style.display = 'none';
         }
 
         function closeEmailModal() {
@@ -1059,30 +1157,48 @@ ${belbinRoles[data.worstRole.name]?.description || 'Описание не най
 
         function showEmailSuccess() {
             document.getElementById('emailSendingStatus').style.display = 'none';
+            document.getElementById('emailActionInterface').style.display = 'none';
+            document.getElementById('emailError').style.display = 'none';
             document.getElementById('emailSuccess').style.display = 'block';
-            document.getElementById('sentToEmail').textContent = userData.organizerEmail;
-        }
-
-        function showEmailError(message) {
-            document.getElementById('emailSendingStatus').style.display = 'none';
-            document.getElementById('emailError').style.display = 'block';
-            if (message) {
-                document.getElementById('errorMessage').textContent = message;
-            }
         }
 
         function retryEmailSending() {
             document.getElementById('emailError').style.display = 'none';
-            document.getElementById('emailSendingStatus').style.display = 'block';
+            showEmailSendingInterface();
+        }
+
+        function showNotificationInModal(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #00b894;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 8px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+                z-index: 1001;
+                animation: slideUp 0.3s ease;
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideUp {
+                    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+                    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
             
             setTimeout(() => {
-                const success = sendEmailReport(testResults);
-                if (success) {
-                    showEmailSuccess();
-                } else {
-                    showEmailError('Пожалуйста, отправьте результаты вручную через ваш почтовый клиент.');
-                }
-            }, 1000);
+                notification.remove();
+                style.remove();
+            }, 2000);
         }
 
         // === СКАЧИВАНИЕ ОТЧЕТА ===
@@ -1104,18 +1220,26 @@ ${belbinRoles[data.worstRole.name]?.description || 'Описание не най
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showNotification('Отчет скачан');
+            showNotification('✅ Отчет скачан');
         }
 
         function generateReportText() {
             const data = testResults;
-            return `
-ТЕСТ БЕЛБИНА - ПЕРСОНАЛЬНЫЙ ОТЧЕТ
+            const formattedDate = new Date(data.timestamp).toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            return `ТЕСТ БЕЛБИНА - ПЕРСОНАЛЬНЫЙ ОТЧЕТ
 ===================================
 
 👤 ИСПЫТУЕМЫЙ: ${data.user.firstName} ${data.user.lastName}
 🆔 ID РЕЗУЛЬТАТА: ${data.user.resultId}
-📅 ДАТА ТЕСТА: ${new Date(data.timestamp).toLocaleDateString('ru-RU')}
+📅 ДАТА ТЕСТА: ${formattedDate}
+📧 EMAIL ОРГАНИЗАТОРА: ${userData.organizerEmail}
 
 🏆 ВАШИ СИЛЬНЫЕ РОЛИ:
 ${data.topRoles.map((r, i) => `${['🥇', '🥈', '🥉'][i]} ${r.name}: ${r.score} баллов`).join('\n')}
@@ -1138,7 +1262,6 @@ ${data.sortedRoles.map((role, index) =>
 ).join('\n')}
 
 ===================================
-📧 Отправлено организатору: ${userData.organizerEmail}
 🔗 Сгенерировано мини-приложением Тест Белбина
             `;
         }
