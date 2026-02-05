@@ -52,6 +52,18 @@
             font-size: 28px;
         }
 
+        h2 {
+            color: #2d3436;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        h3 {
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
         /* Форма регистрации */
         .registration-form {
             margin: 30px 0;
@@ -126,6 +138,20 @@
 
         .btn-secondary:hover {
             background: #e9ecef;
+        }
+
+        /* Инфо-блоки */
+        .info-block {
+            background: #e8f6f3;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #00b894;
+        }
+
+        .info-block.warning {
+            background: #fff8e1;
+            border-left-color: #fdcb6e;
         }
 
         /* Блок утверждений */
@@ -255,7 +281,76 @@
             box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
         }
 
-        /* Результаты */
+        /* Результаты - Худшая роль */
+        .weak-role-section {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 3px solid #e17055;
+        }
+
+        .weak-role-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .weak-role-icon {
+            font-size: 40px;
+            color: #d35400;
+        }
+
+        .weak-role-title {
+            color: #d35400;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .weak-role-score {
+            background: #d35400;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .improve-tips {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tip-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .tip-icon {
+            color: #00b894;
+            font-size: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Карточки всех ролей */
+        .all-roles-section {
+            margin-top: 30px;
+        }
+
         .role-card {
             background: white;
             border-radius: 15px;
@@ -263,6 +358,11 @@
             margin-bottom: 15px;
             border-left: 5px solid;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .role-card:hover {
+            transform: translateY(-3px);
         }
 
         .role-card.gold {
@@ -280,16 +380,9 @@
             background: linear-gradient(to right, #faf3eb, white);
         }
 
-        .role-card.weak {
-            border-color: #e17055;
-            background: linear-gradient(to right, #ffeaa7, white);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+        .role-card.regular {
+            border-color: #6c5ce7;
+            background: white;
         }
 
         .role-header {
@@ -318,44 +411,82 @@
             font-weight: bold;
         }
 
-        .role-score.weak {
-            background: #e17055;
-        }
-
         .role-description {
             color: #495057;
             line-height: 1.5;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
-        /* Данные пользователя */
-        .user-info-card {
-            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        .role-strengths {
+            display: inline-block;
+            background: #00b894;
             color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: center;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
         }
 
-        .user-avatar {
-            width: 80px;
-            height: 80px;
+        .role-weaknesses {
+            display: inline-block;
+            background: #e17055;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* Быстрое описание ролей */
+        .quick-guide {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .role-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
             background: white;
-            border-radius: 50%;
-            margin: 0 auto 15px;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            color: #6c5ce7;
-            font-weight: bold;
+            gap: 8px;
         }
 
-        .user-name {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 5px;
+        .summary-icon {
+            font-size: 20px;
+        }
+
+        /* Прогресс */
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            border-radius: 4px;
+            transition: width 0.4s ease;
         }
 
         /* Адаптивность */
@@ -378,6 +509,10 @@
                 height: 45px;
                 font-size: 18px;
             }
+            
+            .role-summary {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -385,9 +520,9 @@
     <div class="container">
         <!-- Экран 1: Регистрация -->
         <div id="screen-registration" class="screen active">
-            <h1>📝 Регистрация</h1>
+            <h1>📝 Тест Белбина</h1>
             <p style="text-align: center; color: #6c757d; margin-bottom: 30px; line-height: 1.5;">
-                Введите свои данные для получения персонализированных результатов
+                Определите свои командные роли и получите план развития
             </p>
 
             <form id="registrationForm" class="registration-form">
@@ -411,14 +546,17 @@
                            maxlength="50">
                 </div>
 
-                <div style="background: #e8f6f3; border-radius: 12px; padding: 20px; margin: 25px 0;">
+                <div class="info-block">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <span style="font-size: 20px;">🔒</span>
-                        <div style="font-weight: 600; color: #2d3436;">Конфиденциальность данных</div>
+                        <span style="font-size: 20px;">🎯</span>
+                        <div style="font-weight: 600; color: #2d3436;">Что вы получите</div>
                     </div>
-                    <p style="color: #495057; line-height: 1.5; font-size: 14px;">
-                        Ваши данные используются только для формирования персонализированного отчета. 
-                    </p>
+                    <ul style="color: #495057; padding-left: 20px; line-height: 1.6;">
+                        <li>Ваши топ-3 сильные роли</li>
+                        <li><strong>Худшую роль для развития</strong> с конкретными советами</li>
+                        <li>Краткое описание всех 9 ролей Белбина</li>
+                        <li>План улучшения командных навыков</li>
+                    </ul>
                 </div>
 
                 <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -427,43 +565,7 @@
             </form>
         </div>
 
-        <!-- Экран 2: Инструкция -->
-        <div id="screen-instruction" class="screen">
-            <div class="user-info-card">
-                <div class="user-avatar" id="userAvatar">
-                    <!-- Аватарка будет здесь -->
-                </div>
-                <div class="user-name" id="userName"></div>
-            </div>
-
-            <h1>🧩 Тест Белбина</h1>
-            <p style="text-align: center; color: #6c757d; margin-bottom: 25px; line-height: 1.5;">
-                7 блоков по 8 утверждений. Распределите 10 баллов в каждом блоке.
-            </p>
-
-            <div style="background: #fff8e1; border-radius: 12px; padding: 20px; margin: 20px 0;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <span style="font-size: 24px;">📋</span>
-                    <h3>Как заполнять тест</h3>
-                </div>
-                <ul style="color: #495057; padding-left: 20px; line-height: 1.6;">
-                    <li><strong>7 блоков</strong> по 8 утверждений в каждом</li>
-                    <li>Распределите <strong>10 баллов</strong> в каждом блоке</li>
-                    <li>Чем больше утверждение описывает вас — тем больше баллов</li>
-                    <li>Можно ставить от 0 до 10 баллов на каждое утверждение</li>
-                    <li><strong>Сумма в каждом блоке должна равняться 10</strong></li>
-                </ul>
-                <p style="color: #2d3436; font-style: italic; margin-top: 15px;">
-                    ⏱ Время заполнения: 10-15 минут
-                </p>
-            </div>
-
-            <button onclick="startTest()" class="btn btn-primary">
-                🚀 Начать тест
-            </button>
-        </div>
-
-        <!-- Экран 3: Тест -->
+        <!-- Экран 2: Тест -->
         <div id="screen-test" class="screen">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
@@ -473,8 +575,8 @@
                 <div class="block-counter" id="progress-counter">Блок 1/7</div>
             </div>
 
-            <div class="progress-bar" style="height: 8px; background: #e9ecef; border-radius: 4px; margin: 20px 0; overflow: hidden;">
-                <div id="progress-fill" style="height: 100%; background: linear-gradient(90deg, #6c5ce7, #a29bfe); border-radius: 4px; transition: width 0.4s ease; width: 0%"></div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
             </div>
 
             <div id="test-block">
@@ -491,36 +593,90 @@
             </div>
         </div>
 
-        <!-- Экран 4: Результаты -->
+        <!-- Экран 3: Результаты -->
         <div id="screen-results" class="screen">
-            <div class="user-info-card">
-                <div class="user-avatar" id="resultsAvatar">
-                    <!-- Аватарка будет здесь -->
-                </div>
-                <div class="user-name" id="resultsUserName"></div>
-                <div style="opacity: 0.9; font-size: 14px;">Результаты теста</div>
-            </div>
-
             <h1>🎯 Ваши результаты</h1>
-            
+            <p style="text-align: center; color: #6c757d; margin-bottom: 25px;">
+                Распределение командных ролей по методике Белбина
+            </p>
+
             <!-- Сильные роли -->
             <h2 style="color: #00b894; margin-top: 20px; margin-bottom: 15px;">🏆 Ваши сильные роли</h2>
             <div class="results-container" id="strong-results">
                 <!-- Топ-3 роли будут здесь -->
             </div>
 
-            <!-- Слабая роль для развития -->
-            <div style="background: #fff8e1; border-radius: 15px; padding: 25px; margin: 30px 0; border: 2px solid #fdcb6e;">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                    <div style="font-size: 32px; color: #e17055;">💪</div>
-                    <div>
-                        <div style="color: #d35400; font-size: 20px; font-weight: 600;">Роль для развития</div>
-                        <p style="color: #636e72; margin-top: 5px;">Наименее выраженная роль — ваш потенциал роста</p>
+            <!-- ХУДШАЯ РОЛЬ ДЛЯ РАЗВИТИЯ -->
+            <div class="weak-role-section">
+                <div class="weak-role-header">
+                    <div class="weak-role-icon">💪</div>
+                    <div style="flex-grow: 1;">
+                        <div class="weak-role-title">Роль для максимального развития</div>
+                        <p style="color: #636e72; margin-top: 5px;">Наименее выраженная роль — ваш главный потенциал роста</p>
+                    </div>
+                    <div class="weak-role-score" id="weak-role-score">0 баллов</div>
+                </div>
+                
+                <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <div style="font-size: 24px; color: #d35400;" id="weak-role-icon">⚠️</div>
+                        <div>
+                            <div style="font-size: 20px; font-weight: 600; color: #2d3436;" id="weak-role-name">Роль</div>
+                            <div style="color: #6c757d; font-size: 14px;" id="weak-role-type">Тип роли</div>
+                        </div>
+                    </div>
+                    
+                    <div style="color: #495057; line-height: 1.5; margin-bottom: 15px;" id="weak-role-description">
+                        Описание роли
+                    </div>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                        <div style="background: #ffeaa7; padding: 5px 12px; border-radius: 15px; color: #d35400; font-size: 12px;">
+                            💡 Почему развивать
+                        </div>
+                        <div style="background: #a29bfe; padding: 5px 12px; border-radius: 15px; color: white; font-size: 12px;">
+                            🎯 Потенциал роста
+                        </div>
+                        <div style="background: #00b894; padding: 5px 12px; border-radius: 15px; color: white; font-size: 12px;">
+                            ⚡ Быстрый эффект
+                        </div>
                     </div>
                 </div>
                 
-                <div id="weak-role-container">
-                    <!-- Слабая роль будет здесь -->
+                <div class="improve-tips">
+                    <h4 style="color: #2d3436; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 24px;">🎯</span>
+                        Конкретные шаги для улучшения
+                    </h4>
+                    <div id="improve-tips-list">
+                        <!-- Советы будут здесь -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- БЫСТРОЕ ОПИСАНИЕ ВСЕХ РОЛЕЙ -->
+            <div class="quick-guide">
+                <h3 style="color: #6c5ce7; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">📚</span>
+                    Краткое описание всех ролей Белбина
+                </h3>
+                <p style="color: #6c757d; margin-bottom: 20px; line-height: 1.5;">
+                    9 ключевых ролей в команде: сильные и слабые стороны каждой
+                </p>
+                
+                <div class="role-summary" id="all-roles-summary">
+                    <!-- Все роли будут здесь -->
+                </div>
+            </div>
+
+            <!-- ВСЕ РОЛИ ПО ПОРЯДКУ -->
+            <div class="all-roles-section">
+                <h3 style="color: #2d3436; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">📊</span>
+                    Все ваши роли по порядку
+                </h3>
+                <div id="all-roles-list">
+                    <!-- Все роли в порядке убывания будут здесь -->
                 </div>
             </div>
 
@@ -566,7 +722,7 @@
             }
         };
 
-        // ВСЕ 7 БЛОКОВ ВОПРОСОВ ТЕСТА БЕЛБИНА
+        // ВСЕ 7 БЛОКОВ ВОПРОСОВ
         const belbinBlocks = [
             {
                 id: 1,
@@ -668,97 +824,142 @@
             }
         ];
 
-        // Описания всех 9 ролей Белбина
+        // ПОЛНОЕ ОПИСАНИЕ ВСЕХ 9 РОЛЕЙ С ПЛЮСАМИ/МИНУСАМИ
         const belbinRoles = {
             "Исполнитель": { 
-                description: "Надежный и практичный. Превращает идеи в действия, внимателен к деталям.",
+                description: "Превращает идеи в действия. Надежный, практичный, организованный.",
+                strengths: ["Надежность", "Практичность", "Организованность", "Дисциплина"],
+                weaknesses: ["Негибкость", "Консервативность", "Недостаток творчества"],
+                type: "Действующий",
+                icon: "🔧",
                 color: "#3498db",
                 improveTips: [
-                    "Учитесь принимать нестандартные решения",
-                    "Развивайте креативное мышление",
-                    "Пробуйте новые подходы к работе",
-                    "Будьте открыты к изменениям"
-                ]
+                    "Раз в неделю пробуйте новый подход к обычным задачам",
+                    "Участвуйте в мозговых штурмах и предлагайте идеи",
+                    "Делегируйте часть контроля другим",
+                    "Ищите нестандартные решения для рутинных проблем"
+                ],
+                whyImprove: "Развитие гибкости поможет вам адаптироваться к изменениям"
             },
             "Координатор": { 
-                description: "Лидер и организатор. Направляет команду к цели, распределяет задачи.",
+                description: "Организует работу, распределяет задачи. Лидер, который умеет мотивировать.",
+                strengths: ["Лидерство", "Организация", "Делегирование", "Мотивация"],
+                weaknesses: ["Авторитарность", "Манипулятивность", "Отсутствие эмпатии"],
+                type: "Социальный",
+                icon: "👑",
                 color: "#2ecc71",
                 improveTips: [
-                    "Учитесь слушать других без перебивания",
-                    "Практикуйте делегирование",
-                    "Развивайте эмоциональный интеллект",
-                    "Участвуйте как равный участник"
-                ]
+                    "Практикуйте активное слушание в совещаниях",
+                    "Спрашивайте мнение тихих коллег",
+                    "Признавайте ошибки и учитесь на них",
+                    "Развивайте эмоциональный интеллект"
+                ],
+                whyImprove: "Эмпатия сделает вас более эффективным лидером"
             },
             "Мотиватор": { 
-                description: "Энергичный и напористый. Преодолевает препятствия, мотивирует команду.",
+                description: "Энергичный, напористый, преодолевает препятствия. Ориентирован на результат.",
+                strengths: ["Энергичность", "Настойчивость", "Результативность", "Смелость"],
+                weaknesses: ["Нетерпеливость", "Агрессивность", "Импульсивность"],
+                type: "Действующий",
+                icon: "⚡",
                 color: "#e74c3c",
                 improveTips: [
-                    "Учитесь слышать мнение других",
-                    "Практикуйте терпение",
-                    "Осваивайте техники управления гневом",
-                    "Развивайте дипломатические навыки"
-                ]
+                    "Считайте до 10 перед критикой",
+                    "Учитесь слушать до конца",
+                    "Практикуйте техники управления гневом",
+                    "Цените процесс, а не только результат"
+                ],
+                whyImprove: "Терпение поможет сохранить отношения в команде"
             },
             "Генератор": { 
-                description: "Креативный мыслитель. Предлагает новые идеи и подходы.",
+                description: "Творческий мыслитель, предлагает инновации. Богатое воображение.",
+                strengths: ["Креативность", "Инновационность", "Воображение", "Нестандартность"],
+                weaknesses: ["Непрактичность", "Неорганизованность", "Отрыв от реальности"],
+                type: "Мыслительный",
+                icon: "💡",
                 color: "#9b59b6",
                 improveTips: [
-                    "Учитесь доводить идеи до реализации",
-                    "Развивайте практическое мышление",
-                    "Слушайте критику конструктивно",
-                    "Участвуйте в выполнении проектов"
-                ]
+                    "Составляйте конкретные планы реализации идей",
+                    "Учитесь работать с деталями",
+                    "Слушайте практические возражения",
+                    "Работайте над одним проектом до завершения"
+                ],
+                whyImprove: "Практичность поможет вашим идеям реализоваться"
             },
             "Исследователь": { 
-                description: "Ищет новые возможности, устанавливает контакты. Коммуникабелен.",
+                description: "Ищет возможности, устанавливает контакты. Коммуникабельный энтузиаст.",
+                strengths: ["Коммуникабельность", "Энтузиазм", "Адаптивность", "Любознательность"],
+                weaknesses: ["Поверхностность", "Непостоянство", "Потеря интереса"],
+                type: "Социальный",
+                icon: "🔍",
                 color: "#f39c12",
                 improveTips: [
-                    "Учитесь углубляться в одну тему",
-                    "Развивайте концентрацию внимания",
-                    "Практикуйте завершение начатых проектов",
-                    "Ведите дневник достижений"
-                ]
+                    "Углубляйтесь в одну тему на месяц",
+                    "Ведите журнал завершенных проектов",
+                    "Устанавливайте дедлайны для себя",
+                    "Фокусируйтесь на качестве, а не количестве контактов"
+                ],
+                whyImprove: "Глубина знаний повысит ваш авторитет"
             },
             "Оценщик": { 
-                description: "Анализирует и оценивает. Стратегически мыслит, взвешивает решения.",
+                description: "Анализирует, оценивает риски. Стратегический и критический мыслитель.",
+                strengths: ["Аналитичность", "Критическое мышление", "Объективность", "Стратегичность"],
+                weaknesses: ["Цинизм", "Недостаток энтузиазма", "Медлительность"],
+                type: "Мыслительный",
+                icon: "📊",
                 color: "#1abc9c",
                 improveTips: [
-                    "Учитесь видеть позитивные стороны",
-                    "Развивайте эмпатию к коллегам",
+                    "Ищите 3 положительных момента в каждой идее",
                     "Практикуйте быстрое принятие решений",
-                    "Поддерживайте идеи других"
-                ]
+                    "Выражайте поддержку коллегам",
+                    "Развивайте интуитивное мышление"
+                ],
+                whyImprove: "Позитивность повысит ваше влияние в команде"
             },
             "Дипломат": { 
-                description: "Создает гармонию, сглаживает конфликты. Чуткий и дипломатичный.",
+                description: "Создает гармонию, сглаживает конфликты. Чуткий и поддерживающий.",
+                strengths: ["Эмпатия", "Дипломатичность", "Поддержка", "Чуткость"],
+                weaknesses: ["Избегание конфликтов", "Нерешительность", "Зависимость от мнения других"],
+                type: "Социальный",
+                icon: "🤝",
                 color: "#34495e",
                 improveTips: [
-                    "Учитесь говорить 'нет' когда нужно",
-                    "Развивайте уверенность в своих решениях",
+                    "Учитесь говорить 'нет' когда это важно",
+                    "Выражайте свое мнение первым",
                     "Практикуйте конструктивную конфронтацию",
-                    "Высказывайте свое мнение открыто"
-                ]
+                    "Развивайте уверенность в своих решениях"
+                ],
+                whyImprove: "Уверенность поможет отстаивать важные позиции"
             },
             "Завершающий": { 
                 description: "Контролирует качество, внимателен к деталям. Перфекционист.",
+                strengths: ["Внимательность", "Аккуратность", "Ответственность", "Перфекционизм"],
+                weaknesses: ["Излишний контроль", "Медлительность", "Тревожность"],
+                type: "Действующий",
+                icon: "🎯",
                 color: "#7f8c8d",
                 improveTips: [
-                    "Учитесь делегировать контроль качества",
-                    "Принимайте, что идеал недостижим",
-                    "Развивайте гибкость в требованиях",
-                    "Фокусируйтесь на общих целях"
-                ]
+                    "Определяйте 'достаточно хорошо' для каждой задачи",
+                    "Делегируйте проверку качества",
+                    "Фокусируйтесь на общих целях, а не только на деталях",
+                    "Практикуйте осознанность для снижения тревоги"
+                ],
+                whyImprove: "Гибкость ускорит процессы и снизит стресс"
             },
             "Специалист": { 
-                description: "Обладает экспертными знаниями. Углубляется в тему, профессионален.",
+                description: "Эксперт в своей области. Глубокие знания, профессионализм.",
+                strengths: ["Экспертность", "Профессионализм", "Фокусированность", "Глубина знаний"],
+                weaknesses: ["Узкая специализация", "Сложность в объяснении", "Нежелание делиться"],
+                type: "Мыслительный",
+                icon: "🎓",
                 color: "#d35400",
                 improveTips: [
-                    "Учитесь объяснять сложное просто",
-                    "Развивайте общую эрудицию",
-                    "Практикуйте командную работу",
-                    "Делитесь знаниями с коллегами"
-                ]
+                    "Учитесь объяснять сложное простыми словами",
+                    "Делитесь знаниями с коллегами",
+                    "Расширяйте кругозор в смежных областях",
+                    "Участвуйте в кросс-функциональных проектах"
+                ],
+                whyImprove: "Коммуникация усилит ваше влияние в команде"
             }
         };
 
@@ -770,17 +971,14 @@
                 
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                     userData.telegramId = tg.initDataUnsafe.user.id;
-                    // Можно автоматически заполнить имя из Telegram
+                    // Автозаполнение из Telegram
                     if (tg.initDataUnsafe.user.first_name) {
                         document.getElementById('firstName').value = tg.initDataUnsafe.user.first_name;
-                    }
-                    if (tg.initDataUnsafe.user.last_name) {
-                        document.getElementById('lastName').value = tg.initDataUnsafe.user.last_name;
                     }
                 }
             }
             
-            // Настройка формы регистрации
+            // Настройка формы
             const form = document.getElementById('registrationForm');
             form.addEventListener('submit', handleRegistration);
             
@@ -794,65 +992,20 @@
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             
-            // Валидация
             if (!firstName || !lastName) {
                 showNotification('Пожалуйста, заполните имя и фамилию');
                 return;
             }
             
-            if (firstName.length < 2) {
-                showNotification('Имя должно содержать минимум 2 символа');
-                return;
-            }
-            
-            if (lastName.length < 2) {
-                showNotification('Фамилия должна содержать минимум 2 символа');
-                return;
-            }
-            
-            // Сохраняем данные пользователя
             userData.firstName = firstName;
             userData.lastName = lastName;
             userData.testDate = new Date().toISOString();
-            userData.resultId = generateResultId();
+            userData.resultId = 'RES-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
             
-            // Показываем экран инструкции
-            updateUserInfo();
-            showScreen('screen-instruction');
-        }
-
-        // Генерация ID результата
-        function generateResultId() {
-            return 'RES-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        }
-
-        // Обновление информации о пользователе
-        function updateUserInfo() {
-            // Аватар из первых букв
-            const firstLetter = userData.firstName.charAt(0).toUpperCase();
-            const secondLetter = userData.lastName.charAt(0).toUpperCase();
-            const avatarText = firstLetter + secondLetter;
+            // Обновляем имя в интерфейсе
+            document.getElementById('currentUserName').textContent = `${firstName} ${lastName}`;
             
-            // Полное имя
-            const fullName = `${userData.firstName} ${userData.lastName}`;
-            
-            // Обновляем аватары
-            document.getElementById('userAvatar').textContent = avatarText;
-            document.getElementById('resultsAvatar').textContent = avatarText;
-            
-            // Обновляем имена
-            document.getElementById('userName').textContent = fullName;
-            document.getElementById('currentUserName').textContent = fullName;
-            document.getElementById('resultsUserName').textContent = fullName;
-        }
-
-        // Показать экран
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-            window.scrollTo(0, 0);
+            startTest();
         }
 
         // Начать тест
@@ -872,12 +1025,21 @@
             }
         }
 
+        // Показать экран
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
         // Загрузка блока
         function loadBlock(blockIndex) {
             testState.currentBlock = blockIndex;
             const block = belbinBlocks[blockIndex];
             
-            // Обновление прогресса
+            // Прогресс
             const progress = ((blockIndex + 1) / belbinBlocks.length) * 100;
             document.getElementById('progress-fill').style.width = `${progress}%`;
             document.getElementById('progress-counter').textContent = `Блок ${blockIndex + 1}/${belbinBlocks.length}`;
@@ -906,8 +1068,8 @@
                     </div>
                     
                     ${block.statements.map((statement, index) => `
-                        <div class="statement" style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e9ecef;">
-                            <div class="statement-text" style="margin-bottom: 15px; line-height: 1.5;">
+                        <div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e9ecef;">
+                            <div style="margin-bottom: 15px; line-height: 1.5;">
                                 <strong>${index + 1}.</strong> ${statement.text}
                             </div>
                             <div class="points-slider">
@@ -952,7 +1114,6 @@
             const statementIndex = parseInt(slider.dataset.index);
             const value = parseInt(slider.value);
             
-            // Обновляем отображение
             const valueElement = document.getElementById(`value-${blockIndex}-${statementIndex}`);
             const fillElement = document.getElementById(`fill-${blockIndex}-${statementIndex}`);
             
@@ -960,10 +1121,8 @@
             valueElement.classList.add('changing');
             fillElement.style.width = `${(value / 10) * 100}%`;
             
-            // Сохраняем значение
             testState.answers[blockIndex][statementIndex] = value;
             
-            // Обновляем счетчик
             setTimeout(() => {
                 updateBlockCounter(blockIndex);
                 valueElement.classList.remove('changing');
@@ -1007,7 +1166,6 @@
         function calculateResults() {
             resetScores();
             
-            // Подсчет баллов по ролям
             belbinBlocks.forEach((block, blockIndex) => {
                 block.statements.forEach((statement, statementIndex) => {
                     const role = statement.role;
@@ -1022,18 +1180,16 @@
             showResults();
         }
 
-        // Показать результаты
+        // Показать результаты с ХУДШЕЙ РОЛЬЮ
         function showResults() {
             showScreen('screen-results');
             
-            // Сортировка ролей по баллам
+            // Сортировка ролей
             const sortedRoles = Object.entries(testState.totalScores)
                 .map(([roleName, score]) => ({
                     name: roleName,
                     score: score,
-                    description: belbinRoles[roleName]?.description || '',
-                    color: belbinRoles[roleName]?.color || '#6c5ce7',
-                    improveTips: belbinRoles[roleName]?.improveTips || []
+                    ...belbinRoles[roleName]
                 }))
                 .sort((a, b) => b.score - a.score);
             
@@ -1050,48 +1206,93 @@
                         <span class="role-score">${role.score} баллов</span>
                     </div>
                     <div class="role-description">${role.description}</div>
+                    <div style="margin-top: 10px;">
+                        ${role.strengths.slice(0, 2).map(s => 
+                            `<span class="role-strengths">+ ${s}</span>`
+                        ).join('')}
+                    </div>
                 </div>
             `).join('');
             
-            // Слабая роль
-            const weakRole = sortedRoles[sortedRoles.length - 1];
-            const weakRoleContainer = document.getElementById('weak-role-container');
+            // ХУДШАЯ РОЛЬ (последняя в отсортированном массиве)
+            const worstRole = sortedRoles[sortedRoles.length - 1];
             
-            weakRoleContainer.innerHTML = `
-                <div class="role-card weak">
-                    <div class="role-header">
-                        <span class="role-medal">💪</span>
-                        <span class="role-title">${weakRole.name}</span>
-                        <span class="role-score weak">${weakRole.score} баллов</span>
-                    </div>
-                    <div class="role-description">
-                        ${weakRole.description}
-                        <div style="margin-top: 10px; color: #e17055;">
-                            <strong>Почему развивать:</strong> Эта роль наименее выражена у вас.
+            // Обновляем информацию о худшей роли
+            document.getElementById('weak-role-name').textContent = worstRole.name;
+            document.getElementById('weak-role-type').textContent = worstRole.type;
+            document.getElementById('weak-role-description').textContent = worstRole.description;
+            document.getElementById('weak-role-score').textContent = `${worstRole.score} баллов`;
+            document.getElementById('weak-role-icon').textContent = worstRole.icon;
+            
+            // Советы по улучшению
+            const improveTipsList = document.getElementById('improve-tips-list');
+            improveTipsList.innerHTML = worstRole.improveTips.map((tip, index) => `
+                <div class="tip-item">
+                    <div class="tip-icon">${index + 1}</div>
+                    <div>${tip}</div>
+                </div>
+            `).join('');
+            
+            // БЫСТРОЕ ОПИСАНИЕ ВСЕХ РОЛЕЙ
+            const allRolesSummary = document.getElementById('all-roles-summary');
+            allRolesSummary.innerHTML = Object.entries(belbinRoles).map(([roleName, role]) => {
+                const score = testState.totalScores[roleName] || 0;
+                return `
+                    <div class="summary-item" style="border-left-color: ${role.color}">
+                        <div class="summary-title">
+                            <span class="summary-icon">${role.icon}</span>
+                            ${roleName}
+                            <span style="margin-left: auto; font-size: 14px; color: #6c757d;">${score} б.</span>
+                        </div>
+                        <div style="color: #495057; font-size: 13px; line-height: 1.4; margin-bottom: 8px;">
+                            ${role.description}
+                        </div>
+                        <div style="font-size: 11px; color: #00b894;">
+                            + ${role.strengths[0]}
+                        </div>
+                        <div style="font-size: 11px; color: #e17055;">
+                            - ${role.weaknesses[0]}
                         </div>
                     </div>
+                `;
+            }).join('');
+            
+            // ВСЕ РОЛИ ПО ПОРЯДКУ
+            const allRolesList = document.getElementById('all-roles-list');
+            allRolesList.innerHTML = sortedRoles.map((role, index) => `
+                <div class="role-card ${index < 3 ? cardClasses[index] : 'regular'}" style="border-left-color: ${role.color}">
+                    <div class="role-header">
+                        <span class="role-medal">${index < 3 ? medals[index] : (index + 1)}</span>
+                        <span class="role-title">${role.name}</span>
+                        <span class="role-score">${role.score} баллов</span>
+                    </div>
+                    <div class="role-description">${role.description}</div>
+                    <div style="margin-top: 10px;">
+                        ${role.strengths.slice(0, 2).map(s => 
+                            `<span class="role-strengths">+ ${s}</span>`
+                        ).join('')}
+                        ${role.weaknesses.slice(0, 2).map(w => 
+                            `<span class="role-weaknesses">- ${w}</span>`
+                        ).join('')}
+                    </div>
                 </div>
-            `;
+            `).join('');
         }
 
         // Сохранить результаты
         function saveResults() {
             const saveBtn = document.getElementById('saveResultsBtn');
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = '⏳ Сохраняем...';
+            saveBtn.textContent = '✅ Сохранено!';
             saveBtn.disabled = true;
             
-            // Формируем данные для отправки
+            // Сохраняем в localStorage
             const resultData = {
                 user: userData,
                 testResults: testState.totalScores,
-                answers: testState.answers,
                 timestamp: new Date().toISOString()
             };
             
-            // Сохраняем в localStorage для демо
             localStorage.setItem(`belbin_result_${userData.resultId}`, JSON.stringify(resultData));
-            localStorage.setItem('last_user_data', JSON.stringify(userData));
             
             // Отправляем в Telegram если есть
             if (window.Telegram && window.Telegram.WebApp) {
@@ -1101,24 +1302,19 @@
                 }));
             }
             
-            // Показываем уведомление
+            showNotification('Результаты успешно сохранены!');
+            
             setTimeout(() => {
-                saveBtn.textContent = '✅ Сохранено!';
-                showNotification('Результаты успешно сохранены!');
-                
-                // Можно вернуться к началу через 2 секунды
-                setTimeout(() => {
-                    showScreen('screen-registration');
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                }, 2000);
-            }, 1000);
+                saveBtn.textContent = '💾 Сохранить результаты';
+                saveBtn.disabled = false;
+            }, 2000);
         }
 
         // Пройти тест снова
         function showTestAgain() {
             if (confirm('Пройти тест заново? Текущие результаты будут сброшены.')) {
-                showScreen('screen-instruction');
+                showScreen('screen-registration');
+                document.getElementById('registrationForm').reset();
             }
         }
 
